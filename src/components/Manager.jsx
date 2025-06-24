@@ -25,7 +25,7 @@ const Manager = () => {
   const savePassword = () => {
     console.log(form);
     setPasswordArray([...passwordArray, form]);
-    localStorage.setItem("passwords", JSON.stringify([...passwordArray, form]))
+    localStorage.setItem("passwords", JSON.stringify([...passwordArray, form]));
     console.log([...passwordArray, form]);
   };
 
@@ -103,6 +103,39 @@ const Manager = () => {
             ></lord-icon>
             Add Password
           </button>
+        </div>
+
+        <div className="passwords">
+          <h2 className="font-bold text-2xl py-4">Your Passwords: </h2>
+          {passwordArray.length === 0 && <div>No passwords to show</div>}
+          {passwordArray.length != 0 && (
+            <table className="table-auto w-full rounded-md overflow-hidden">
+              <thead className=" bg-green-800 text-white">
+                <tr>
+                  <th className="py-2">Site</th>
+                  <th className="py-2">Username</th>
+                  <th className="py-2">Password</th>
+                </tr>
+              </thead>
+              <tbody className="bg-green-100">
+                {passwordArray.map((item, index) => {
+                  return (
+                    <tr key={index}>
+                      <td className="py-2 border border-white text-center w-32">
+                        {item.site}
+                      </td>
+                      <td className="py-2 border border-white text-center w-32">
+                        {item.username}
+                      </td>
+                      <td className="py-2 border border-white text-center w-32">
+                        {item.password}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </>
