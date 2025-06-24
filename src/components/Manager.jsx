@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
 
 const Manager = () => {
   const ref = useRef();
+  const passwordRef = useRef();
 
   const [form, setform] = useState({ site: "", username: "", password: "" });
   const [passwordArray, setPasswordArray] = useState([]);
@@ -14,11 +16,19 @@ const Manager = () => {
     }
   }, []);
 
+  const copyText = (text) => {
+    toast.dismiss();
+    toast.success('Copied to clipboard!',{ duration: 500 });
+    navigator.clipboard.writeText(text);
+  };
+
   const showPassword = () => {
     if (ref.current.src.includes("icons/hidden.png")) {
       ref.current.src = "icons/eye.png";
+      passwordRef.current.type = "password";
     } else {
       ref.current.src = "icons/hidden.png";
+      passwordRef.current.type = "text";
     }
   };
 
@@ -35,8 +45,9 @@ const Manager = () => {
 
   return (
     <>
+      <Toaster />
       <div className="absolute inset-0 -z-10 h-full w-full bg-green-50 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]">
-        <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-fuchsia-400 opacity-20 blur-[100px]"></div>
+        <div className="absoluteLeft-0 right-0Top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-fuchsia-400 opacity-20 blur-[100px]"></div>
       </div>
 
       <div className="mycontainer">
@@ -73,14 +84,15 @@ const Manager = () => {
               <input
                 className="rounded-full border border-green-500 w-full px-4 py-1"
                 placeholder="Enter Password"
-                type="text"
+                type="password"
                 value={form.password}
                 onChange={handleChange}
+                ref={passwordRef}
                 name="password"
                 id=""
               />
               <span
-                className="absolute right-[3px] top-[4px] cursor-pointer"
+                className="absolute right-[3px]Top-[4px] cursor-pointer"
                 onClick={showPassword}
               >
                 <img
@@ -121,14 +133,73 @@ const Manager = () => {
                 {passwordArray.map((item, index) => {
                   return (
                     <tr key={index}>
-                      <td className="py-2 border border-white text-center w-32">
-                        {item.site}
+                      <td className="py-2 border border-white text-center">
+                        <div className="flex items-center justify-center ">
+                          <a href={item.site} target="_blank">
+                            {item.site}
+                          </a>
+                          <div
+                            className="lordiconcopy cursor-pointer size-7"
+                            onClick={() => {
+                              copyText(item.site);
+                            }}
+                          >
+                            <lord-icon
+                              style={{
+                                width: "25px",
+                                height: "25px",
+                                paddingTop: "3px",
+                                paddingLeft: "3px",
+                              }}
+                              src="https://cdn.lordicon.com/xuoapdes.json"
+                              trigger="hover"
+                            ></lord-icon>
+                          </div>
+                        </div>
                       </td>
-                      <td className="py-2 border border-white text-center w-32">
-                        {item.username}
+                      <td className="py-2 border border-white text-center">
+                        <div className="flex items-center justify-center ">
+                          {item.username}
+                          <div
+                            className="lordiconcopy cursor-pointer size-7"
+                            onClick={() => {
+                              copyText(item.username);
+                            }}
+                          >
+                            <lord-icon
+                              style={{
+                                width: "25px",
+                                height: "25px",
+                                paddingTop: "3px",
+                                paddingLeft: "3px",
+                              }}
+                              src="https://cdn.lordicon.com/xuoapdes.json"
+                              trigger="hover"
+                            ></lord-icon>
+                          </div>
+                        </div>
                       </td>
-                      <td className="py-2 border border-white text-center w-32">
-                        {item.password}
+                      <td className="py-2 border border-white text-center">
+                        <div className="flex items-center justify-center">
+                          {item.password}{" "}
+                          <div
+                            className="lordiconcopy cursor-pointer size-7"
+                            onClick={() => {
+                              copyText(item.password);
+                            }}
+                          >
+                            <lord-icon
+                              style={{
+                                width: "25px",
+                                height: "25px",
+                                paddingTop: "3px",
+                                paddingLeft: "3px",
+                              }}
+                              src="https://cdn.lordicon.com/xuoapdes.json"
+                              trigger="hover"
+                            ></lord-icon>
+                          </div>
+                        </div>
                       </td>
                     </tr>
                   );
