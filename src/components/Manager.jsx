@@ -34,16 +34,21 @@ const Manager = () => {
   };
 
   const savePassword = () => {
-    // console.log(form);
-    setPasswordArray([...passwordArray, { ...form, id: uuidv4() }]);
-    localStorage.setItem(
-      "passwords",
-      JSON.stringify([...passwordArray, { ...form, id: uuidv4() }])
-    );
-    // console.log([...passwordArray, form]);
-    setform({site:"", username:"", password: ""});
-    toast.dismiss();
-    toast.success("PassWord Saved!", { duration: 1000 });
+    if(form.site.length > 3 && form.username.length > 3 ,form.password.length > 3){
+
+      // console.log(form);
+      setPasswordArray([...passwordArray, { ...form, id: uuidv4() }]);
+      localStorage.setItem(
+        "passwords",
+        JSON.stringify([...passwordArray, { ...form, id: uuidv4() }])
+      );
+      // console.log([...passwordArray, form]);
+      setform({site:"", username:"", password: ""});
+      toast.dismiss();
+      toast.success("PassWord Saved!", { duration: 1000 });
+    }else{
+      toast.error("Please Enter the required fields to save password!", {duration: 1000});
+    }
   };
 
   const deletePassword = (id) => {
@@ -77,7 +82,7 @@ const Manager = () => {
         <div className="absoluteLeft-0 right-0Top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-fuchsia-400 opacity-20 blur-[100px]"></div>
       </div>
 
-      <div className="p-2 md:p-0 md:mycontainer">
+      <div className="p-2 pt-3 md:mycontainer">
         <h1 className="text-4xl text font-bold text-center">
           <span className="text-green-500"> &lt;</span>
           Pass
@@ -148,7 +153,7 @@ const Manager = () => {
           <h2 className="font-bold text-2xl py-4">Your Passwords: </h2>
           {passwordArray.length === 0 && <div>No passwords to show</div>}
           {passwordArray.length != 0 && (
-            <table className="table-auto w-full rounded-md overflow-hidden">
+            <table className="table-auto w-full rounded-md overflow-hidden mb-10">
               <thead className=" bg-green-800 text-white">
                 <tr>
                   <th className="py-2">Site</th>
