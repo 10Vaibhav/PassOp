@@ -4,10 +4,12 @@ const port = 3000;
 const dotenv = require("dotenv");
 dotenv.config();
 const bodyParser = require("body-parser");
+const cors = require('cors');
 
+app.use(cors());
 app.use(bodyParser.json());
 
-const {MongoClient} = require("mongodb");
+const {MongoClient, ObjectId} = require("mongodb");
 
 const url = process.env.Mongo_URL;
 const client = new MongoClient(url);
@@ -27,15 +29,28 @@ app.post("/", async (req, res)=> {
     const password = req.body;
     const db = client.db(dbName);
     const collection = db.collection('passwords');
+    
     const findResult = await collection.insertOne(password);
     res.send({success: true, result : findResult});
 });
 
-app.delete("/", async (req, res)=> {
-    const password = req.body;
+app.put("/", async (req, res)=> {
+    const { id, ...updateData } = req.body;
     const db = client.db(dbName);
     const collection = db.collection('passwords');
-    const findResult = await collection.deleteOne(password);
+    
+    const findResult = await collection.updateOne(
+        { id: id },
+        { $set: updateData }
+    );
+    res.send({success: true, result : findResult});
+});
+
+app.delete("/", async (req, res)=> {
+    const { id } = req.body;
+    const db = client.db(dbName);
+    const collection = db.collection('passwords');
+    const findResult = await collection.deleteOne({ id: id });
     res.send({success: true, result : findResult});
 });
 

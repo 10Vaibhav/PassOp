@@ -9,12 +9,15 @@ const Manager = () => {
   const [form, setform] = useState({ site: "", username: "", password: "" });
   const [passwordArray, setPasswordArray] = useState([]);
 
-  useEffect(() => {
-    let passwords = localStorage.getItem("passwords");
+  const getPasswords = async () => {
+    let req = await fetch("http://localhost:3000/");
+    let passwords = await req.json();
+    setPasswordArray(passwords);
+    console.log(passwords);
+  };
 
-    if (passwords) {
-      setPasswordArray(JSON.parse(passwords));
-    }
+  useEffect(() => {
+    getPasswords();
   }, []);
 
   const copyText = (text) => {
@@ -33,42 +36,90 @@ const Manager = () => {
     }
   };
 
-  const savePassword = () => {
-    if(form.site.length > 3 && form.username.length > 3 ,form.password.length > 3){
-
-      // console.log(form);
-      setPasswordArray([...passwordArray, { ...form, id: uuidv4() }]);
-      localStorage.setItem(
-        "passwords",
-        JSON.stringify([...passwordArray, { ...form, id: uuidv4() }])
-      );
-      // console.log([...passwordArray, form]);
-      setform({site:"", username:"", password: ""});
-      toast.dismiss();
-      toast.success("PassWord Saved!", { duration: 1000 });
-    }else{
-      toast.error("Please Enter the required fields to save password!", {duration: 1000});
+  const savePassword = async () => {
+    if (
+      form.site.length > 3 && 
+      form.username.length > 3 &&
+      form.password.length > 3
+    ) {
+      try {
+        const newPassword = { ...form, id: form.id || uuidv4() };
+        
+        if (form.id) {
+          // Update existing password
+          await fetch("http://localhost:3000/", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(newPassword),
+          });
+          
+          // Update local state
+          setPasswordArray(passwordArray.map(item => 
+            item.id === form.id ? newPassword : item
+          ));
+        } else {
+          // Add new password
+          await fetch("http://localhost:3000/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(newPassword),
+          });
+          
+          // Update local state
+          setPasswordArray([...passwordArray, newPassword]);
+        }
+        
+        setform({ site: "", username: "", password: "" });
+        toast.dismiss();
+        toast.success("Password Saved!", { duration: 1000 });
+      } catch (error) {
+        console.error("Error saving password:", error);
+        toast.error("Error saving password!", { duration: 1000 });
+      }
+    } else {
+      toast.error("Please Enter the required fields to save password!", {
+        duration: 1000,
+      });
     }
   };
 
-  const deletePassword = (id) => {
+  const deletePassword = async (id) => {
     let c = confirm("Do you really want to delete this password!");
 
     if (c) {
-      setPasswordArray(passwordArray.filter((item) => item.id !== id));
-      localStorage.setItem(
-        "passwords",
-        JSON.stringify(passwordArray.filter((item) => item.id !== id))
-      );
+      try {
+        await fetch("http://localhost:3000/", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id }),
+        });
+        
+        // Update local state
+        setPasswordArray(passwordArray.filter((item) => item.id !== id));
+        
+        // Clear form if it was the edited item
+        if (form.id === id) {
+          setform({ site: "", username: "", password: "" });
+        }
 
-    toast.dismiss();
-    toast.success("Password Deleted Successfully!", { duration: 1000 });
+        toast.dismiss();
+        toast.success("Password Deleted Successfully!", { duration: 1000 });
+      } catch (error) {
+        console.error("Error deleting password:", error);
+        toast.error("Error deleting password!", { duration: 1000 });
+      }
     }
   };
 
-  const editPassword = (id) => {
-    setform(passwordArray.filter((i) => i.id === id)[0]);
-    setPasswordArray(passwordArray.filter((item) => item.id !== id));
+  const editPassword = async (id) => {
+    const passwordToEdit = passwordArray.find((item) => item.id === id);
+    if (passwordToEdit) {
+      setform({ ...passwordToEdit });
+    }
+  };
+
+  const cancelEdit = () => {
+    setform({ site: "", username: "", password: "" });
   };
 
   const handleChange = (e) => {
@@ -93,6 +144,9 @@ const Manager = () => {
         </p>
 
         <div className="text-black flex flex-col p-4 gap-8 items-center">
+          <h3 className="text-xl font-semibold text-green-700">
+            {form.id ? "Edit Password" : "Add New Password"}
+          </h3>
           <input
             className="rounded-full border border-green-500 w-full px-4 py-1"
             placeholder="Enter Website URL"
@@ -137,16 +191,26 @@ const Manager = () => {
               </span>
             </div>
           </div>
-          <button
-            onClick={savePassword}
-            className="flex gap-2 cursor-pointer justify-center items-center bg-green-400 hover:bg-green-300 hover:scale-99 rounded-full px-8 py-2 w-fit border border-green-900"
-          >
-            <lord-icon
-              src="https://cdn.lordicon.com/efxgwrkc.json"
-              trigger="hover"
-            ></lord-icon>
-            Save Password
-          </button>
+          <div className="flex gap-4">
+            <button
+              onClick={savePassword}
+              className="flex gap-2 cursor-pointer justify-center items-center bg-green-400 hover:bg-green-300 hover:scale-99 rounded-full px-8 py-2 w-fit border border-green-900"
+            >
+              <lord-icon
+                src="https://cdn.lordicon.com/efxgwrkc.json"
+                trigger="hover"
+              ></lord-icon>
+              {form.id ? "Update Password" : "Save Password"}
+            </button>
+            {form.id && (
+              <button
+                onClick={cancelEdit}
+                className="flex gap-2 cursor-pointer justify-center items-center bg-red-400 hover:bg-red-300 hover:scale-99 rounded-full px-8 py-2 w-fit border border-red-900"
+              >
+                Cancel Edit
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="passwords">
